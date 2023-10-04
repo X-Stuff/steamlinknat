@@ -45,7 +45,7 @@ main()
 
     # Renew DHCP (Set up routes and /etc/resolv.conf)
     # IMPORTANT: This will set up correct routes and dns
-    udhcpc -i mlan0 -s /etc/udhcpc.script -n
+    udhcpc -i mlan0 -s /etc/udhcpc.script -n -q
 }
 
 # disable bg version
