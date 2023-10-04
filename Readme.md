@@ -40,7 +40,7 @@
  + iptables [v1.4.21](https://git.netfilter.org/iptables/tag/?h=v1.4.21) built with cross compilation docker image for armv7l with **musl** compiler ([here](https://github.com/dockcross/dockcross/tree/master/linux-armv7l-musl))
     
     + Some modification to source code applied:
-    + Add `-D__GCLIB__=2` to `CFLAGS` in order to compile sources
+    + Add `-D__GLIBC__=2` to `CFLAGS` in order to compile sources
     + Add `#define u_intXX_t uintXX_t` in order to compile sources
 
 
