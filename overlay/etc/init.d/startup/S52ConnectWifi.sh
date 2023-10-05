@@ -2,11 +2,15 @@
 
 AP_NAME=`cat /etc/wifi.ap`
 
+rerun_dhcp_mlan0()
+{
+    # Renew DHCP (Set up routes and /etc/resolv.conf)
+    # IMPORTANT: This will set up correct routes and dns
+    udhcpc -i mlan0 -s /etc/udhcpc.script -n -q
+}
+
 main()
 {
-    #
-    echo "Running in backround"
-
     #
     echo "Scanning wifi..."
     connmanctl scan wifi
@@ -43,20 +47,42 @@ main()
         done
     fi
 
-    # Renew DHCP (Set up routes and /etc/resolv.conf)
-    # IMPORTANT: This will set up correct routes and dns
-    udhcpc -i mlan0 -s /etc/udhcpc.script -n -q
+    rerun_dhcp_mlan0
 }
 
-# disable bg version
-main
 
-#BACKGROUND_ARG="--background"
-#
-#if [ "$1" != "$BACKGROUND_ARG" ];
-#then
-#    echo "Launching in backround"
-#    /bin/sh $0 $BACKGROUND_ARG &
-#else
-#    main
-#fi
+wifi_watchdog()
+{
+    local PREV_IP=`ip -f inet addr show mlan0 | grep inet | awk '{print $2}' | cut -d "/" -f 1`
+
+    while true; do
+    
+        local NEW_IP=`ip -f inet addr show mlan0 | grep inet | awk '{print $2}' | cut -d "/" -f 1`
+
+        if [ $NEW_IP != $PREV_IP ]; then
+            echo "Wifi IP address changed. Rerunning DHCP again, with script."
+            rerun_dhcp_mlan0
+        fi
+
+        PREV_IP=$NEW_IP
+        sleep 30
+    done     
+}
+
+WATCHDOG_ARG="--watchdog"
+
+if [ "$1" == "" ]; then
+    
+    # Do main job
+    main
+
+    # Launch watchdog
+    /bin/sh $0 $WATCHDOG_ARG &
+    exit 0
+fi
+
+if [ "$1" == "$WATCHDOG_ARG" ];
+then
+   echo "Running watchdog"
+   wifi_watchdog
+fi

@@ -70,7 +70,3 @@ mkdir steamlink
 cd steamlink
 git clone https://github.com/X-Stuff/steamlinknat.git
 ```
-
-## TODO
-
-* Launch DCHP server on steamlink and use bridge
