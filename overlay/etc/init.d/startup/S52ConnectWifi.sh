@@ -56,16 +56,22 @@ wifi_watchdog()
     local PREV_IP=`ip -f inet addr show mlan0 | grep inet | awk '{print $2}' | cut -d "/" -f 1`
 
     while true; do
+        sleep 30
     
         local NEW_IP=`ip -f inet addr show mlan0 | grep inet | awk '{print $2}' | cut -d "/" -f 1`
 
-        if [ $NEW_IP != $PREV_IP ]; then
+        if [ "$NEW_IP" != "$PREV_IP" ]; then
             echo "Wifi IP address changed. Rerunning DHCP again, with script."
             rerun_dhcp_mlan0
         fi
 
+        local DEFAULT_ROUTE=`ip route | grep default | awk '{print $3}'`
+        if [ "$DEFAULT_ROUTE" != "" ]; then
+            echo "No default route found. Rerunning DHCP again, with script."
+            rerun_dhcp_mlan0
+        fi
+
         PREV_IP=$NEW_IP
-        sleep 30
     done     
 }
 
